@@ -1,0 +1,37 @@
+{
+  "name": "@gmsarates/w-api-wrapper",
+  "version": "1.0.0",
+  "description": "Uma biblioteca JavaScript para integração com a API do WhatsApp W-API",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "whatsapp",
+    "api",
+    "w-api",
+    "mensagens",
+    "chatbot"
+  ],
+  "author": "gmsarates",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gmsarates/w-api-wrapper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gmsarates/w-api-wrapper/issues"
+  },
+  "homepage": "https://github.com/gmsarates/w-api-wrapper#readme"
+}
