@@ -2,12 +2,12 @@ export class WApiClient {
   constructor(apiKey: string, instanceId: string, baseUrl?: string);
 
   getInstance(): Promise<any>;
-  initInstance(): Promise<any>;
+  restartInstance(): Promise<any>;
   getQrCode(): Promise<any>;
   logout(): Promise<any>;
   sendTextMessage(to: string, body: string): Promise<any>;
   sendImageMessage(to: string, caption: string, url: string): Promise<any>;
-  sendFileMessage(to: string, caption: string, url: string): Promise<any>;
+  sendFileMessage(to: string, caption: string, url: string, extension?: string, fileName?: string): Promise<any>;
   sendButtonMessage(
     to: string,
     title: string,

@@ -9,9 +9,9 @@ class WApiClient {
    * Create a new W-API client
    * @param {string} apiKey - Your W-API API key
    * @param {string} instanceId - Your W-API instance ID
-   * @param {string} baseUrl - The base URL for the API (default: https://api.w-api.app/v1)
+   * @param {string} baseUrl - The base URL for the API (default: https://api.w-api.app)
    */
-  constructor(apiKey, instanceId, baseUrl = 'https://api.w-api.app/v1') {
+  constructor(apiKey, instanceId, baseUrl = 'https://api.w-api.app') {
     if (!apiKey) throw new Error('API key is required');
     if (!instanceId) throw new Error('Instance ID is required');
 
@@ -21,6 +21,7 @@ class WApiClient {
     
     this.http = axios.create({
       baseURL: this.baseUrl,
+      params: { instanceId: this.instanceId },
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${this.apiKey}`
@@ -34,7 +35,7 @@ class WApiClient {
    */
   async getInstance() {
     try {
-      const response = await this.http.get(`/instances/${this.instanceId}`);
+      const response = await this.http.get('/v1/instance/fetch-instance');
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -42,12 +43,12 @@ class WApiClient {
   }
 
   /**
-   * Initialize an instance
-   * @returns {Promise} - Instance initialization result
+   * Restart the instance
+   * @returns {Promise} - Instance restart result
    */
-  async initInstance() {
+  async restartInstance() {
     try {
-      const response = await this.http.post(`/instances/${this.instanceId}/init`);
+      const response = await this.http.get('/v1/instance/restart');
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -60,7 +61,7 @@ class WApiClient {
    */
   async getQrCode() {
     try {
-      const response = await this.http.get(`/instances/${this.instanceId}/qrcode`);
+      const response = await this.http.get('/v1/instance/qr-code');
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -73,7 +74,7 @@ class WApiClient {
    */
   async logout() {
     try {
-      const response = await this.http.post(`/instances/${this.instanceId}/logout`);
+      const response = await this.http.get('/v1/instance/disconnect');
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -88,8 +89,8 @@ class WApiClient {
    */
   async sendTextMessage(to, body) {
     try {
-      const data = { to, body };
-      const response = await this.http.post(`/instances/${this.instanceId}/message/text`, data);
+      const data = { phone: to, message: body };
+      const response = await this.http.post('/v1/message/send-text', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -105,8 +106,8 @@ class WApiClient {
    */
   async sendImageMessage(to, caption, url) {
     try {
-      const data = { to, caption, url };
-      const response = await this.http.post(`/instances/${this.instanceId}/message/image`, data);
+      const data = { phone: to, image: url, caption };
+      const response = await this.http.post('/v1/message/send-image', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -118,12 +119,15 @@ class WApiClient {
    * @param {string} to - Phone number in format 5511999999999@c.us
    * @param {string} caption - File caption
    * @param {string} url - File URL
+   * @param {string} [extension] - File extension without dot (default: inferred from the URL)
+   * @param {string} [fileName] - File name
    * @returns {Promise} - Message send result
    */
-  async sendFileMessage(to, caption, url) {
+  async sendFileMessage(to, caption, url, extension, fileName) {
     try {
-      const data = { to, caption, url };
-      const response = await this.http.post(`/instances/${this.instanceId}/message/file`, data);
+      const inferred = url.split(/[?#]/)[0].split('.').pop();
+      const data = { phone: to, document: url, extension: extension || inferred, fileName, caption };
+      const response = await this.http.post('/v1/message/send-document', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -141,8 +145,12 @@ class WApiClient {
    */
   async sendButtonMessage(to, title, description, buttons, footer = '') {
     try {
-      const data = { to, title, description, buttons, footer };
-      const response = await this.http.post(`/instances/${this.instanceId}/message/button`, data);
+      const data = {
+        phone: to,
+        message: [title, description, footer].filter(Boolean).join('\n\n'),
+        buttons: buttons.map(({ id, text }) => ({ buttonId: id, label: text }))
+      };
+      const response = await this.http.post('/v1/message/send-button-list', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -157,8 +165,8 @@ class WApiClient {
    */
   async createGroup(name, participants) {
     try {
-      const data = { name, participants };
-      const response = await this.http.post(`/instances/${this.instanceId}/groups/create`, data);
+      const data = { groupName: name, participants };
+      const response = await this.http.post('/v1/group/create-group', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -173,8 +181,8 @@ class WApiClient {
    */
   async addGroupParticipants(groupId, participants) {
     try {
-      const data = { participants };
-      const response = await this.http.post(`/instances/${this.instanceId}/groups/${groupId}/participants/add`, data);
+      const data = { groupId, phones: participants };
+      const response = await this.http.post('/v1/group/add-participant', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -189,8 +197,8 @@ class WApiClient {
    */
   async removeGroupParticipants(groupId, participants) {
     try {
-      const data = { participants };
-      const response = await this.http.post(`/instances/${this.instanceId}/groups/${groupId}/participants/remove`, data);
+      const data = { groupId, phones: participants };
+      const response = await this.http.post('/v1/group/remove-participant', data);
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -203,7 +211,7 @@ class WApiClient {
    */
   async getContacts() {
     try {
-      const response = await this.http.get(`/instances/${this.instanceId}/contacts`);
+      const response = await this.http.get('/v1/contacts/contacts/fetch-contacts');
       return response.data;
     } catch (error) {
       this._handleError(error);
@@ -216,7 +224,7 @@ class WApiClient {
    */
   async getChats() {
     try {
-      const response = await this.http.get(`/instances/${this.instanceId}/chats`);
+      const response = await this.http.get('/v1/chats/fetch-chats');
       return response.data;
     } catch (error) {
       this._handleError(error);

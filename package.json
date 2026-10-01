@@ -1,6 +1,6 @@
 {
   "name": "@gmsarates/w-api-wrapper",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Uma biblioteca JavaScript para integração com a API do WhatsApp W-API",
   "main": "src/index.js",
   "types": "src/index.d.ts",

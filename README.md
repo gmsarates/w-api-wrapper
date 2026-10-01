@@ -36,7 +36,7 @@ enviarMensagem();
 ```javascript
 async function inicializarInstancia() {
   try {
-    const resultado = await client.initInstance();
+    const resultado = await client.restartInstance();
     console.log('Instância inicializada:', resultado);
   } catch (error) {
     console.error('Erro ao inicializar instância:', error);
@@ -145,7 +145,7 @@ async function notificarAgendamento(dadosAgendamento) {
 
 ### Instâncias
 - `getInstance()` - Obter informações da instância
-- `initInstance()` - Inicializar uma instância
+- `restartInstance()` - Inicializar uma instância
 - `getQrCode()` - Obter o QR code para autenticação
 - `logout()` - Desconectar da instância
 
